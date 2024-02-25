@@ -1,7 +1,7 @@
-import OpenAI from "openai";
+const OpenAI = require("openai");
 const openai = new OpenAI({ apiKey: `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`,  dangerouslyAllowBrowser: true });
 
-export const callOpenAI = async (prompt) => {
+const callOpenAI = async (prompt) => {
   const completion = await openai.chat.completions.create({
     messages: [{ role: "assistant", content: prompt }],
     model: "gpt-4-0125-preview",
@@ -9,7 +9,7 @@ export const callOpenAI = async (prompt) => {
   return completion.choices[0].message.content;
 }
 
-export const callOpenAIStream = async (messages, onChunkReceived) => {
+const callOpenAIStream = async (messages, onChunkReceived) => {
   const completion = await openai.chat.completions.create({
     model: "gpt-4-0125-preview",
     messages: messages,
@@ -22,3 +22,5 @@ export const callOpenAIStream = async (messages, onChunkReceived) => {
     }
   }
 }
+
+module.exports = { callOpenAI, callOpenAIStream };

@@ -1,7 +1,15 @@
 const express = require('express');
+const { callOpenAIStream } = require('./openAI');
+
+const { Server } = require('ws');
+const http = require('http');
+const cors = require('cors');
+
 const app = express();
 
-const cors = require('cors');
+const server = http.createServer(app);
+const wss = new Server({ server });
+app.use(express.json());
 
 // SET UP THE SERVER CONFIGURATION
 
@@ -11,7 +19,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.listen(3000, () => console.log('\x1b[32m', 'Server is successfully running on port 3000', '\x1b[0m'));
 
 // API SERVER CODE. RN JUST ROUTES
 
@@ -26,4 +33,34 @@ app.get('/about', (req, res) => {
 
 app.get('/contact', (req, res) => {
     res.download('');
+});
+
+app.get('/api', (req, res) => {
+    res.send('Calling the API');
+});
+
+
+// WEBSOCKET SERVER CODE
+
+wss.on('connection', (ws) => {
+    ws.on('message', async (message) => {
+        const { messages } = JSON.parse(message);
+        console.log('Received frontend message!: \n', messages);
+
+        const onChunkReceived = (content) => {
+            ws.send(JSON.stringify({ content }));
+        };
+
+        try {
+            await callOpenAIStream(messages, onChunkReceived);
+            ws.send(JSON.stringify({ content: 'Stream completed' }));
+        } catch (error) {
+            ws.send(JSON.stringify({ error: 'Error processing the stream' }));
+        }
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`\x1b[32mServer running on port ${PORT}\x1b[0m`);
 });
