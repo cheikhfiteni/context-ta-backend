@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+    commands:
+      - echo Installing source NPM dependencies...
+      - npm install
+  pre_build:
+    commands:
+      - echo Running tests...
+      - npm test
+  build:
+    commands:
+      - echo Build started on `date`
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Packaging the built artifacts
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
+  encrypt: true
+  name: packaged-artifact
+
+cache:
+  paths:
+    - 'node_modules/**/*'
