@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# AWS CodeBuild Output
+build-output/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
