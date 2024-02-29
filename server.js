@@ -24,7 +24,7 @@ app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
     console.log('Did');
-    res.send('Hello World from (hopefully) lightweight Express Backend');
+    res.send('Hello World from (hopefully) lightweight Express Backend \n');
     });
 
 app.get('/about', (req, res) => {
