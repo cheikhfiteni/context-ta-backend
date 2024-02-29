@@ -4,4 +4,5 @@
 cd /usr/src/app
 
 # Start the node server in the background
-npm start &
+pm2 start server.js --name my-app
+pm2 save
