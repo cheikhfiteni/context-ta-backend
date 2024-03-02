@@ -1,5 +1,6 @@
 const express = require('express');
 const { callOpenAIStream } = require('./openAI');
+const { run } = require('./mongoDB');
 
 const { Server } = require('ws');
 const http = require('http');
@@ -23,7 +24,7 @@ app.use(cors(corsOptions));
 // API SERVER CODE. RN JUST ROUTES
 
 app.get('/', (req, res) => {
-    console.log('Did');
+    console.log('Naviagated to homepage');
     res.send('Hello World from (hopefully) lightweight Express Backend \n');
     });
 
@@ -38,6 +39,17 @@ app.get('/contact', (req, res) => {
 app.get('/api', (req, res) => {
     res.send('Calling the API');
 });
+
+app.get('/test-mongodb-connection', async (req, res) => {
+    try {
+      await run();
+      res.send('Successfully connected to MongoDB.');
+    } catch (error) {
+      console.log(error);
+      res.status(500).send('Failed to connect to MongoDB.');
+    }
+  });
+  
 
 
 // WEBSOCKET SERVER CODE
