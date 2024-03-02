@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# .env files
+*.env
+
 # AWS CodeBuild Output
 build-output/
 
