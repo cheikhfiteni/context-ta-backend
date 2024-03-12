@@ -207,42 +207,42 @@ const testFunctionality = async () => {
 
     // CREATING TEST OBJECTS, PUTTING THEM IN THE DATABASE
 
-    // // Create a new user
-    // const user = await createUser({
-    //   userId: 'user1234456474',
-    //   name: 'John Doe',
-    //   email: 'john.doe@example.com'
-    // });
+    // Create a new user
+    const user = await createUser({
+      userId: await ensureUniqueUserId(),
+      name: 'John Doe',
+      email: 'john.doe@example.com'
+    });
 
-    // console.log('User created:', user);
+    console.log('User created:', user);
 
-    // // Add a new document metadata to the user
-    // const documentMetadata = await addDocumentToUser(user._id, {
-    //   documentHash: 'docHash123',
-    //   title: 'Test Document'
-    // });
+    // Add a new document metadata to the user
+    const documentMetadata = await addDocumentToUser(user._id, {
+      documentHash: 'docHash123',
+      title: 'Test Document'
+    });
 
-    // console.log('Document metadata added:', documentMetadata);
-    // console.log('User with document:', await getUser(user._id));
+    console.log('Document metadata added:', documentMetadata);
+    console.log('User with document:', await getUser(user._id));
 
-    // // Create a new conversation on the document metadata
-    // const conversation = await newConversation(documentMetadata._id, {
-    //   conversationId: 'conv12346789',
-    //   mostRecentTimestamp: new Date(),
-    //   textSelectionId: 'text123',
-    //   scaledPosition: 1,
-    //   conversation: []
-    // });
+    // Create a new conversation on the document metadata
+    const conversation = await newConversation(documentMetadata._id, {
+      conversationId: await ensureUniqueConversationId(),
+      mostRecentTimestamp: new Date(),
+      textSelectionId: 'text123',
+      scaledPosition: 1,
+      conversation: []
+    });
 
-    // // Update the conversation by adding conversation entries
-    // const updatedConversation = await updateConversation(conversation._id, {
-    //   entity: 'User',
-    //   response: 'Hello!',
-    //   timestamp: new Date()
-    // });
+    // Update the conversation by adding conversation entries
+    const updatedConversation = await updateConversation(conversation._id, {
+      entity: 'User',
+      response: 'Hello!',
+      timestamp: new Date()
+    });
 
-    // console.log('Updated conversation:', updatedConversation);
-    // console.log('User with document and conversation:', util.inspect(await getUserPopulated(user._id), { showHidden: false, depth: null, colors: true }));
+    console.log('Updated conversation:', updatedConversation);
+    console.log('User with document and conversation:', util.inspect(await getUserPopulated(user._id), { showHidden: false, depth: null, colors: true }));
 
     console.log('ensureUniqueUserId:', await ensureUniqueUserId());
     console.log('ensureUniqueConversationId:', await ensureUniqueConversationId());
