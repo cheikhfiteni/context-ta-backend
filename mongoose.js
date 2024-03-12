@@ -234,54 +234,6 @@ const updateConversation = async (conversationId, entryData) => {
   return conversation;
 };
 
-
-const getAllConversationsFromUser = async (userId) => {
-  try {
-    await connectToDatabase();
-    // Find the user by their custom userId and populate the nested paths
-    const userWithConversations = await User.findOne({ userId: userId })
-      .populate({
-        path: 'documents',
-        populate: {
-          path: 'conversations',
-          model: 'Conversation',
-          populate: {
-            path: 'conversationEntries',
-          }
-        }
-      });
-
-    if (!userWithConversations) {
-      console.log('User not found');
-      return null;
-    }
-
-    // Extract the conversations from the populated user document
-    const conversations = userWithConversations.documents.map(doc => doc.conversations);
-
-    // Log or process the conversations as needed
-    console.log('Conversations:', conversations.map(conversation => {
-      util.inspect(conversation, { showHidden: false, depth: null, colors: true });
-      if (conversation.conversationEntries) {
-        console.log('Number of conversation entries:', conversation.conversationEntries.length);
-      } else {
-        console.log('No conversation entries found or conversation is undefined');
-      }
-      // conversation.conversationEntries.forEach(entry => {
-      //   console.log(util.inspect(entry, { showHidden: false, depth: null, colors: true }));
-      // });
-  
-    }
-    ));
-    return conversations;
-  } catch (error) {
-    console.error('Error getting conversations from user:', error);
-    throw error;
-  } finally {
-    await closeDatabaseConnection();
-  }
-};
-
 // TESTING
 const printDatabaseContents = async () => {
   await connectToDatabase();
@@ -415,6 +367,5 @@ const testConversationContinuity = async () => {
 //     console.error('Failed to connect to the database:', error);
 //   }
 // })();
-getAllConversationsFromUser('80a2892a-8948-4d7e-854f');
 
 module.exports = { connectToDatabase, closeDatabaseConnection, ensureUniqueConversationId, ensureUniqueUserId, getUser, createUser, addDocumentToUser, attachNewConversation, updateConversation};
