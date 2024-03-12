@@ -1,5 +1,6 @@
 const express = require('express');
 const { callOpenAIStream } = require('./openAI');
+const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
 const { run } = require('./mongoDB');
 
 const { Server } = require('ws');
@@ -42,7 +43,8 @@ app.get('/api', (req, res) => {
 
 app.get('/test-mongodb-connection', async (req, res) => {
     try {
-      await run();
+      // move to a middleware or somewhere called on server start.
+      await connectToDatabase();
       res.send('Successfully connected to MongoDB.');
     } catch (error) {
       console.log(error);
@@ -50,7 +52,10 @@ app.get('/test-mongodb-connection', async (req, res) => {
     }
   });
   
-
+process.on('SIGINT', async () => {
+    await closeDatabaseConnection();
+    process.exit(0);
+});
 
 // WEBSOCKET SERVER CODE
 

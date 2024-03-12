@@ -1,11 +1,20 @@
-// Am I using GPT COPILOT OR SUPERMAVEN?
-
 const mongoose = require('mongoose');
+const assert = require('assert');
+require('dotenv').config();
+
+const username = process.env.MONGODB_USERNAME;
+const password = process.env.MONGODB_PASSWORD;
 
 const connectToDatabase = async () => {
-  const uri = 'mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority';
-  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-  console.log('Connected to MongoDB');
+  const uri = `mongodb+srv://${username}:${password}@context-ta-data-cluster.ire5hjv.mongodb.net/?retryWrites=true&w=majority&appName=Context-TA-Data-Cluster`;
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+  assert((await mongoose.connection.db.command({ ping: 1 })).ok == 1, "ping did not return ok");
+  console.log("Pinged your deployment. You successfully connected to MongoDB!");
+};
+
+const closeDatabaseConnection = async () => {
+  await mongoose.connection.close();
+  console.log('\nDatabase connection succesfully closed.');
 };
 
 const getUser = async (userId) => {
@@ -61,4 +70,4 @@ const deleteUser = async (userId) => {
   return user;
 };
 
-module.exports = { connectToDatabase, getUser, createUser, updateUser, deleteUser };
+module.exports = { connectToDatabase, closeDatabaseConnection, getUser, createUser, updateUser, deleteUser };
