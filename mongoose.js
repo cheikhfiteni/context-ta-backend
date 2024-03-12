@@ -52,7 +52,7 @@ const UserSchema = new mongoose.Schema({
 const DocumentMetadataSchema = new mongoose.Schema({
   documentHash: { type: String, required: true },
   title: String,
-  conversations: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' }
+  conversations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' }]
 });
 
 const ConversationEntrySchema = new mongoose.Schema({
@@ -181,11 +181,18 @@ const getUserByUserId = async (userId) => {
   return user;
 };
 
+// This works, just tested.
 const getUserPopulated = async (_id) => {
   const user = await User.findById(_id)
     .populate({
       path: 'documents',
-      populate: { path: 'conversations' }
+      populate: {
+        path: 'conversations',
+        model: 'Conversation',
+        populate: {
+          path: 'conversationEntries',
+        }
+      }
     });
   return user;
 }
@@ -207,11 +214,12 @@ const addDocumentToUser = async (userId, documentData) => {
 };
 
 // Function to create a new conversation on the document metadata
-const newConversation = async (documentId, conversationData) => {
+// Works as checked by async()
+const attachNewConversation = async (documentId, conversationData) => {
   const documentMetadata = await DocumentMetadata.findById(documentId);
   const conversation = new Conversation(conversationData);
   await conversation.save();
-  documentMetadata.conversations = conversation._id;
+  documentMetadata.conversations.push(conversation._id);
   await documentMetadata.save();
   return conversation;
 };
@@ -226,6 +234,53 @@ const updateConversation = async (conversationId, entryData) => {
   return conversation;
 };
 
+
+const getAllConversationsFromUser = async (userId) => {
+  try {
+    await connectToDatabase();
+    // Find the user by their custom userId and populate the nested paths
+    const userWithConversations = await User.findOne({ userId: userId })
+      .populate({
+        path: 'documents',
+        populate: {
+          path: 'conversations',
+          model: 'Conversation',
+          populate: {
+            path: 'conversationEntries',
+          }
+        }
+      });
+
+    if (!userWithConversations) {
+      console.log('User not found');
+      return null;
+    }
+
+    // Extract the conversations from the populated user document
+    const conversations = userWithConversations.documents.map(doc => doc.conversations);
+
+    // Log or process the conversations as needed
+    console.log('Conversations:', conversations.map(conversation => {
+      util.inspect(conversation, { showHidden: false, depth: null, colors: true });
+      if (conversation.conversationEntries) {
+        console.log('Number of conversation entries:', conversation.conversationEntries.length);
+      } else {
+        console.log('No conversation entries found or conversation is undefined');
+      }
+      // conversation.conversationEntries.forEach(entry => {
+      //   console.log(util.inspect(entry, { showHidden: false, depth: null, colors: true }));
+      // });
+  
+    }
+    ));
+    return conversations;
+  } catch (error) {
+    console.error('Error getting conversations from user:', error);
+    throw error;
+  } finally {
+    await closeDatabaseConnection();
+  }
+};
 
 // TESTING
 const printDatabaseContents = async () => {
@@ -270,7 +325,7 @@ const testFunctionality = async () => {
     console.log('User with document:', await getUser(user._id));
 
     // Create a new conversation on the document metadata
-    const conversation = await newConversation(documentMetadata._id, {
+    const conversation = await attachNewConversation(documentMetadata._id, {
       conversationId: await ensureUniqueConversationId(),
       mostRecentTimestamp: new Date(),
       textSelectionId: 'text123',
@@ -302,8 +357,8 @@ const testFunctionality = async () => {
 const testConversationContinuity = async () => {
   try {
     await connectToDatabase();
-    const userId = '15580e4d-3d6d-46c8-9f4b';
-    const user = await getUserByUserId(userId);
+    const userId = '80a2892a-8948-4d7e-854f';
+    let user = await getUserByUserId(userId);
     if (!user) {
       console.log('User not found');
     } else {
@@ -312,7 +367,7 @@ const testConversationContinuity = async () => {
       const documentMetadata = await DocumentMetadata.findById(documentId);
       const conversationId = documentMetadata.conversations[0];
 
-      for (let i = 1; i <= 10; i++) {
+      for (let i = 1; i <= 3; i++) {
         const entity = i % 2 === 0 ? 'AI' : 'User';
         const response = `Hello ${i}!`;
         const updatedConversation = await updateConversation(conversationId, {
@@ -320,12 +375,13 @@ const testConversationContinuity = async () => {
           response: response,
           timestamp: new Date()
         });
-  
-        console.log(`Conversation ${i} update:`, updatedConversation);
-        console.log(`User with document and conversation ${i} update:`, util.inspect(await getUserPopulated(user._id), { showHidden: false, depth: null, colors: true }));
-      }
-  }
 
+        // Re-fetch the user to get updated conversations
+        user = await getUserPopulated(user._id);
+        console.log(`Conversation on ${i} update:`, updatedConversation);
+        console.log(`User with document and conversation ${i} update:`, util.inspect(user, { showHidden: false, depth: null, colors: true }));
+      }
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -334,9 +390,31 @@ const testConversationContinuity = async () => {
 }
 
 // RUNNING TESTS
-
+// mongoose.set('debug', true);
 // testFunctionality();
 // printDatabaseContents();
-testConversationContinuity();
+// testConversationContinuity();
+// (async () => {
+//   try {
+//     await connectToDatabase();
+//     let user = await getUserPopulated('65f0be75a174202f9cf24920');
+//     let dcomes = user.documents[0];
+//     await attachNewConversation(dcomes, {
+//       conversationId: await ensureUniqueConversationId(),
+//       mostRecentTimestamp: new Date(),
+//       textSelectionId: 'text123',
+//       scaledPosition: 1,
+//       conversation: []
+//     });
+//     // console.log('User:', user);
+//     // console.log (util.inspect(user, { showHidden: false, depth: null, colors: true }));
+//     await testConversationContinuity();
+//     await closeDatabaseConnection();
+//   } catch (error) {
+//     await closeDatabaseConnection();
+//     console.error('Failed to connect to the database:', error);
+//   }
+// })();
+getAllConversationsFromUser('80a2892a-8948-4d7e-854f');
 
-module.exports = { connectToDatabase, closeDatabaseConnection, ensureUniqueConversationId, ensureUniqueUserId, getUser, createUser, addDocumentToUser, newConversation, updateConversation};
+module.exports = { connectToDatabase, closeDatabaseConnection, ensureUniqueConversationId, ensureUniqueUserId, getUser, createUser, addDocumentToUser, attachNewConversation, updateConversation};
