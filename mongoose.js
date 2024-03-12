@@ -147,11 +147,37 @@ const ensureUniqueConversationId = async () => {
   return conversationId;
 };
 
+const deleteDatabaseDANGEROUS = async () => {
+  try {
+    await connectToDatabase();
+    const db = mongoose.connection.db;
+    const collections = await db.listCollections().toArray();
+
+    for (const collection of collections) {
+      await db.collection(collection.name).drop();
+    }
+
+    console.log('All collections dropped and database deleted.');
+  } catch (error) {
+    console.error('Error deleting database:', error);
+  } finally {
+    await closeDatabaseConnection();
+  }
+};
+
 
 // CRUD OPERATIONS
 
 const getUser = async (_id) => {
   const user = await User.findById(_id);
+  return user;
+};
+
+// Important distinction—using our custom userId, not the _id
+const getUserByUserId = async (userId) => {
+  const user = await User.findOne({
+    userId: userId
+  });
   return user;
 };
 
@@ -192,11 +218,29 @@ const newConversation = async (documentId, conversationData) => {
 
 // Function to update a conversation by adding conversation entries
 const updateConversation = async (conversationId, entryData) => {
+  // const conversation = await Conversation.findOne({conversationId: conversationId});
   const conversation = await Conversation.findOne(conversationId);
   conversation.conversationEntries.push(entryData);
   conversation.mostRecentTimestamp = new Date(); // Update the most recent timestamp
   await conversation.save();
   return conversation;
+};
+
+
+// TESTING
+const printDatabaseContents = async () => {
+  await connectToDatabase();
+
+  // Get all collections
+  const collections = await mongoose.connection.db.listCollections().toArray();
+
+  for (const collection of collections) {
+    console.log(`Collection: ${collection.name}`);
+    const documents = await mongoose.connection.db.collection(collection.name).find({}).toArray();
+    console.log(documents);
+  }
+
+  await closeDatabaseConnection();
 };
 
 // Test the functionality at the end
@@ -210,7 +254,7 @@ const testFunctionality = async () => {
     // Create a new user
     const user = await createUser({
       userId: await ensureUniqueUserId(),
-      name: 'John Doe',
+      name: 'TESTER FOR LONG CONVO',
       email: 'john.doe@example.com'
     });
 
@@ -255,6 +299,44 @@ const testFunctionality = async () => {
   }
 }
 
-testFunctionality();
+const testConversationContinuity = async () => {
+  try {
+    await connectToDatabase();
+    const userId = '15580e4d-3d6d-46c8-9f4b';
+    const user = await getUserByUserId(userId);
+    if (!user) {
+      console.log('User not found');
+    } else {
+      // Assuming the user has at least one document and one conversation
+      const documentId = user.documents[0];
+      const documentMetadata = await DocumentMetadata.findById(documentId);
+      const conversationId = documentMetadata.conversations[0];
 
-module.exports = { connectToDatabase, closeDatabaseConnection, getUser, createUser, addDocumentToUser, newConversation, updateConversation};
+      for (let i = 1; i <= 10; i++) {
+        const entity = i % 2 === 0 ? 'AI' : 'User';
+        const response = `Hello ${i}!`;
+        const updatedConversation = await updateConversation(conversationId, {
+          entity: entity,
+          response: response,
+          timestamp: new Date()
+        });
+  
+        console.log(`Conversation ${i} update:`, updatedConversation);
+        console.log(`User with document and conversation ${i} update:`, util.inspect(await getUserPopulated(user._id), { showHidden: false, depth: null, colors: true }));
+      }
+  }
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    await closeDatabaseConnection();
+  }
+}
+
+// RUNNING TESTS
+
+// testFunctionality();
+// printDatabaseContents();
+testConversationContinuity();
+
+module.exports = { connectToDatabase, closeDatabaseConnection, ensureUniqueConversationId, ensureUniqueUserId, getUser, createUser, addDocumentToUser, newConversation, updateConversation};
