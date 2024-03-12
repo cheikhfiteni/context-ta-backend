@@ -64,11 +64,11 @@ const ConversationEntrySchema = new mongoose.Schema({
 // Conversations jump off from one another, that should be a different conversation
 // Schema. Also figure out the best way to index the conversation data.
 const ConversationSchema = new mongoose.Schema({
-  conversationId: { type: String, required: true },
+  conversationId: { type: String, required: true, unique: true},
   mostRecentTimestamp: Date,
   textSelectionId: String,
   scaledPosition: Number,
-  conversation: [ConversationEntrySchema]
+  conversationEntries: [ConversationEntrySchema]
 });
 
 
@@ -129,69 +129,95 @@ UserSchema.pre('remove', function(next) {
 
 
 
-const getUser = async (userId) => {
-  const User = mongoose.model('User', new mongoose.Schema({
-    userId: String,
-    name: String,
-    email: String,
-    password: String,
-  }));
-
-  const user = await User.findById(userId);
+const getUser = async (_id) => {
+  const user = await User.findById(_id);
   return user;
 };
 
-const createUser = async (user) => {
-  const User = mongoose.model('User', new mongoose.Schema({
-    userId: String,
-    name: String,
-    email: String,
-    password: String,
-  }));
+const getUserPopulated = async (_id) => {
+  const user = await User.findById(_id).populate('documents');
+  return user;
+}
 
+const createUser = async (user) => {
   const newUser = new User(user);
   await newUser.save();
   return newUser;
 };
 
-const updateUser = async (userId, user) => {
-  const User = mongoose.model('User', new mongoose.Schema({
-    userId: String,
-    name: String,
-    email: String,
-    password: String,
-  }));
-
-  const existingUser = await User.findById(userId);
-  existingUser.name = user.name;
-  existingUser.email = user.email;
-  existingUser.password = user.password;
-  await existingUser.save();
-  return existingUser;
+// Function to add a document metadata to a user
+const addDocumentToUser = async (userId, documentData) => {
+  const user = await User.findById(userId);
+  const documentMetadata = new DocumentMetadata(documentData);
+  await documentMetadata.save();
+  user.documents.push(documentMetadata._id);
+  await user.save(); // This should trigger the middleware to check for duplicate documentHashes
+  return documentMetadata;
 };
 
-const deleteUser = async (userId) => {
-  const User = mongoose.model('User', new mongoose.Schema({
-    userId: String,
-    name: String,
-    email: String,
-    password: String,
-  }));
-
-  const user = await User.findByIdAndDelete(userId);
-  return user;
+// Function to create a new conversation on the document metadata
+const newConversation = async (documentId, conversationData) => {
+  const documentMetadata = await DocumentMetadata.findById(documentId);
+  const conversation = new Conversation(conversationData);
+  await conversation.save();
+  documentMetadata.conversations = conversation._id;
+  await documentMetadata.save();
+  return conversation;
 };
 
-// Test the functionality at the end
+// Function to update a conversation by adding conversation entries
+const updateConversation = async (conversationId, entryData) => {
+  const conversation = await Conversation.findOne(conversationId);
+  conversation.conversationEntries.push(entryData);
+  conversation.mostRecentTimestamp = new Date(); // Update the most recent timestamp
+  await conversation.save();
+  return conversation;
+};
+
 // Test the functionality at the end
 const testFunctionality = async () => {
   try {
 
     await connectToDatabase();
 
+    // CREATING TEST OBJECTS, PUTTING THEM IN THE DATABASE
 
+    // Create a new user
+    const user = await createUser({
+      userId: 'user123445',
+      name: 'John Doe',
+      email: 'john.doe@example.com'
+    });
 
+    console.log('User created:', user);
 
+    // Add a new document metadata to the user
+    const documentMetadata = await addDocumentToUser(user._id, {
+      documentHash: 'docHash123',
+      title: 'Test Document'
+    });
+
+    console.log('Document metadata added:', documentMetadata);
+    console.log('User with document:', await getUser(user._id));
+
+    // Create a new conversation on the document metadata
+    const conversation = await newConversation(documentMetadata._id, {
+      conversationId: 'conv1234',
+      mostRecentTimestamp: new Date(),
+      textSelectionId: 'text123',
+      scaledPosition: 1,
+      conversation: []
+    });
+
+    // Update the conversation by adding conversation entries
+    const updatedConversation = await updateConversation(conversation._id, {
+      entity: 'User',
+      response: 'Hello!',
+      timestamp: new Date()
+    });
+
+    console.log('Updated conversation:', updatedConversation);
+    console.log('User with document and conversation:', await getUserPopulated(user._id));
 
 
   } catch (error) {
@@ -203,4 +229,4 @@ const testFunctionality = async () => {
 
 testFunctionality();
 
-module.exports = { connectToDatabase, closeDatabaseConnection, getUser, createUser, updateUser, deleteUser };
+module.exports = { connectToDatabase, closeDatabaseConnection, getUser, createUser, addDocumentToUser, newConversation, updateConversation};
