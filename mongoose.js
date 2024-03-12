@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const util = require('util');
 const assert = require('assert');
 require('dotenv').config();
 
@@ -188,7 +189,7 @@ const testFunctionality = async () => {
 
     // Create a new user
     const user = await createUser({
-      userId: 'user12344564',
+      userId: 'user1234456474',
       name: 'John Doe',
       email: 'john.doe@example.com'
     });
@@ -206,7 +207,7 @@ const testFunctionality = async () => {
 
     // Create a new conversation on the document metadata
     const conversation = await newConversation(documentMetadata._id, {
-      conversationId: 'conv123467',
+      conversationId: 'conv12346789',
       mostRecentTimestamp: new Date(),
       textSelectionId: 'text123',
       scaledPosition: 1,
@@ -221,7 +222,7 @@ const testFunctionality = async () => {
     });
 
     console.log('Updated conversation:', updatedConversation);
-    console.log('User with document and conversation:', JSON.stringify(await getUserPopulated(user._id), null, 2));
+    console.log('User with document and conversation:', util.inspect(await getUserPopulated(user._id), { showHidden: false, depth: null, colors: true }));
 
 
   } catch (error) {
