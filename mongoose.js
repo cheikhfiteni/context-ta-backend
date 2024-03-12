@@ -135,7 +135,11 @@ const getUser = async (_id) => {
 };
 
 const getUserPopulated = async (_id) => {
-  const user = await User.findById(_id).populate('documents');
+  const user = await User.findById(_id)
+    .populate({
+      path: 'documents',
+      populate: { path: 'conversations' }
+    });
   return user;
 }
 
@@ -184,7 +188,7 @@ const testFunctionality = async () => {
 
     // Create a new user
     const user = await createUser({
-      userId: 'user123445',
+      userId: 'user12344564',
       name: 'John Doe',
       email: 'john.doe@example.com'
     });
@@ -202,7 +206,7 @@ const testFunctionality = async () => {
 
     // Create a new conversation on the document metadata
     const conversation = await newConversation(documentMetadata._id, {
-      conversationId: 'conv1234',
+      conversationId: 'conv123467',
       mostRecentTimestamp: new Date(),
       textSelectionId: 'text123',
       scaledPosition: 1,
@@ -217,7 +221,7 @@ const testFunctionality = async () => {
     });
 
     console.log('Updated conversation:', updatedConversation);
-    console.log('User with document and conversation:', await getUserPopulated(user._id));
+    console.log('User with document and conversation:', JSON.stringify(await getUserPopulated(user._id), null, 2));
 
 
   } catch (error) {
