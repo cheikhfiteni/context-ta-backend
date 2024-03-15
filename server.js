@@ -1,7 +1,6 @@
 const express = require('express');
 const { callOpenAIStream } = require('./openAI');
 const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
-const { run } = require('./mongoDB');
 
 const { Server } = require('ws');
 const http = require('http');
@@ -16,7 +15,7 @@ app.use(express.json());
 // SET UP THE SERVER CONFIGURATION
 
 const corsOptions = {
-  origin: ['http://localhost:5713', 'https://context-asa06jm4w-envoy-intelligence.vercel.app'],
+  origin: ['http://localhost:5713', 'https://context-asa06jm4w-envoy-intelligence.vercel.app', 'https://context-ta.com'],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
