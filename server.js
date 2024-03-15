@@ -2,6 +2,7 @@ const express = require('express');
 const { callOpenAIStream } = require('./openAI');
 const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
 
+const {validateAccessToken} = require('./middleware/auth0.middleware');
 const { errorHandler } = require("./middleware/error.middleware");
 const  notFoundHandler = require("./middleware/not-found.middleware");
 
@@ -62,15 +63,15 @@ const checkScope = (requiredScope) => {
     };
 };
 
-// SECURE ALL ROUTES
-app.use(checkJwt);
-
 // API SERVER CODE. RN JUST ROUTES
 
 app.get('/', (req, res) => {
     console.log('Naviagated to homepage');
-    res.send('Hello World from (hopefully) lightweight Express Backend \n');
+    res.send('API Health Check Successful\n');
     });
+
+// SECURE ALL ROUTES (except health check we use for load balancer)
+app.use(validateAccessToken);
 
 app.get('/about', (req, res) => {
     res.status(500).send('About');
