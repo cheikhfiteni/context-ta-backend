@@ -64,8 +64,6 @@ const checkScope = (requiredScope) => {
 
 // SECURE ALL ROUTES
 app.use(checkJwt);
-app.use(errorHandler);
-app.use(notFoundHandler);
 
 // API SERVER CODE. RN JUST ROUTES
 
@@ -162,6 +160,10 @@ wss.on('connection', (ws) => {
         }
     });
 });
+
+// ERROR HANDLING MIDDLEWARE
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
