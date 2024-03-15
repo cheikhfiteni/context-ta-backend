@@ -26,7 +26,7 @@ const VIEW_HISTORY_SCOPE = 'read:history';
 // SET UP THE SERVER CONFIGURATION
 
 const corsOptions = {
-  origin: ['http://localhost:5713', 'https://context-asa06jm4w-envoy-intelligence.vercel.app', 'https://context-ta.com'],
+  origin: ['http://localhost:5173', 'https://context-asa06jm4w-envoy-intelligence.vercel.app', 'https://context-ta.com'],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
