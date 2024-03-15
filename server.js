@@ -68,14 +68,15 @@ const checkScope = (requiredScope) => {
 app.get('/', (req, res) => {
     console.log('Naviagated to homepage');
     res.send('API Health Check Successful\n');
-    });
+});
 
-// SECURE ALL ROUTES (except health check we use for load balancer)
+// SECURE ALL ROUTES (except health check \ which we use for load balancer)
 app.use(validateAccessToken);
+//--------------------------------------------
 
 app.get('/about', (req, res) => {
     res.status(500).send('About');
-    });
+});
 
 app.get('/contact', (req, res) => {
     res.download('');
@@ -143,6 +144,7 @@ process.on('SIGINT', async () => {
 });
 
 // WEBSOCKET SERVER CODE
+// TODO SECURE THE WEBSOCKET WITH TOKEN!!!
 
 wss.on('connection', (ws) => {
     ws.on('message', async (message) => {
