@@ -2,6 +2,9 @@ const express = require('express');
 const { callOpenAIStream } = require('./openAI');
 const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
 
+const { errorHandler } = require("./middleware/error.middleware");
+const  notFoundHandler = require("./middleware/not-found.middleware");
+
 const { Server } = require('ws');
 const http = require('http');
 const cors = require('cors');
@@ -61,6 +64,8 @@ const checkScope = (requiredScope) => {
 
 // SECURE ALL ROUTES
 app.use(checkJwt);
+app.use(errorHandler);
+app.use(notFoundHandler);
 
 // API SERVER CODE. RN JUST ROUTES
 
