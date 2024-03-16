@@ -63,6 +63,12 @@ const checkScope = (requiredScope) => {
     };
 };
 
+// Helper function to extract unique user ID from the JWT
+const getUserIdFromToken = (req) => {
+    userId = req.auth.payload.sub;
+    return userId;
+};
+
 // API SERVER CODE. RN JUST ROUTES
 
 app.get('/', (req, res) => {
@@ -83,7 +89,8 @@ app.get('/contact', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
-    res.send('Calling the API');
+    const userId = getUserIdFromToken(req);
+    res.send(`Calling the API from ${userId}!`);
 });
 
 app.get('/test-mongodb-connection', async (req, res) => {
@@ -99,10 +106,6 @@ app.get('/test-mongodb-connection', async (req, res) => {
 
 // NEW HISTORY ROUTE
 // Assuming you have a function to extract the user ID from the JWT
-const getUserIdFromToken = (req) => {
-    // Extract the user ID from the JWT claims
-    return req.user.sub; // 'sub' is a standard JWT claim for the user's identifier
-    };
 
 // app.get('/history/:documentId', checkJwt, async (req, res) => {
 //     const userIdFromToken = getUserIdFromToken(req);
