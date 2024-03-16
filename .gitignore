@@ -28,3 +28,6 @@ build-output/
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary ignore
+messages/
