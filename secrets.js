@@ -10,24 +10,6 @@ const client = new SecretsManagerClient({
 region: "us-east-2",
 });
 
-//   let response;
-  
-//   try {
-//     response = await client.send(
-//       new GetSecretValueCommand({
-//         SecretId: secret_name,
-//         VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
-//       })
-//     );
-//   } catch (error) {
-//     // For a list of exceptions thrown, see
-//     // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-//     throw error;
-//   }
-  
-//   const secret = response.SecretString;
-  
-
 async function getSecret() {
     try {
       const response = await client.send(
@@ -57,6 +39,7 @@ async function loadSecretsIntoEnv() {
     } catch (error) {
         console.error('Error retrieving secrets', error);
         // process.exit(0); // Exit the process non-fatally (ie keep commented)
+        process.env['TEST_THAT_LOAD_WORKS'] = 'production';
     }
 }
 

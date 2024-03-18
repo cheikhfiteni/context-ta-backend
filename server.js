@@ -25,6 +25,8 @@ app.use(express.json());
   await loadSecretsIntoEnv();
 })();
 
+console.log('\x1b[31m%s\x1b[0m', process.env.TEST_THAT_LOAD_WORKS);
+
 // SCOPES
 const VIEW_HISTORY_SCOPE = 'read:history';
 
