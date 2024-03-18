@@ -13,13 +13,17 @@ const cors = require('cors');
 
 const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require('jwks-rsa');
-require('dotenv').config();
+require('dotenv').config({ path: '/.env', overwrite: true });
 
 const app = express();
 
 const server = http.createServer(app);
 const wss = new Server({ server });
 app.use(express.json());
+
+console.log('\x1b[31m%s\x1b[0m', process.env.AUTH0_AUDIENCE);
+console.log('\x1b[31m%s\x1b[0m', process.env.TEST_THAT_LOAD_WORKS);
+console.log('\x1b[31m%s\x1b[0m', process.env.FIRST_TIME);
 
 (async () => {
   await loadSecretsIntoEnv();

@@ -31,6 +31,7 @@ async function getSecret() {
 
 async function loadSecretsIntoEnv() {
     try {
+        process.env['TEST_THAT_LOAD_WORKS'] = 'firing here pre await';
         const secrets = await getSecret();
         // Assuming the secrets are in key-value pairs
         for (const [key, value] of Object.entries(secrets)) {
