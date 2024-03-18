@@ -1,10 +1,11 @@
 const express = require('express');
 const { callOpenAIStream } = require('./openAI');
 const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
+const { loadSecretsIntoEnv }  = require('./secrets');
 
 const {validateAccessToken} = require('./middleware/auth0.middleware');
 const { errorHandler } = require("./middleware/error.middleware");
-const  notFoundHandler = require("./middleware/not-found.middleware");
+const notFoundHandler = require("./middleware/not-found.middleware");
 
 const { Server } = require('ws');
 const http = require('http');
@@ -20,15 +21,24 @@ const server = http.createServer(app);
 const wss = new Server({ server });
 app.use(express.json());
 
+(async () => {
+  await loadSecretsIntoEnv();
+})();
+
 // SCOPES
 const VIEW_HISTORY_SCOPE = 'read:history';
 
 // SET UP THE SERVER CONFIGURATION
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://context-asa06jm4w-envoy-intelligence.vercel.app', 'https://context-ta.com'],
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-};
+    origin: [
+      'http://localhost:5173',
+      'https://context-asa06jm4w-envoy-intelligence.vercel.app',
+      'https://context-fiq8a0eob-envoy-intelligence.vercel.app', // Removed the trailing slash here
+      'https://context-ta.com'
+    ],
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  };
 
 app.use(cors(corsOptions));
 
