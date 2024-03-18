@@ -31,16 +31,12 @@ async function getSecret() {
 
 async function loadSecretsIntoEnv() {
     try {
-        process.env['TEST_THAT_LOAD_WORKS'] = 'firing here pre await';
         const secrets = await getSecret();
-        // Assuming the secrets are in key-value pairs
         for (const [key, value] of Object.entries(secrets)) {
             process.env[key] = value;
         }
     } catch (error) {
         console.error('Error retrieving secrets', error);
-        // process.exit(0); // Exit the process non-fatally (ie keep commented)
-        process.env['TEST_THAT_LOAD_WORKS'] = 'production';
     }
 }
 

@@ -1,5 +1,5 @@
 const { auth } = require("express-oauth2-jwt-bearer");
-require('dotenv').config({ path: '/.env', overwrite: true });
+require('dotenv').config();
 
 const validateAccessToken = auth({
   issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
