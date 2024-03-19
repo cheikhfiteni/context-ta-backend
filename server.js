@@ -3,7 +3,7 @@ const { callOpenAIStream } = require('./openAI');
 const { connectToDatabase, closeDatabaseConnection} = require('./mongoose');
 const { loadSecretsIntoEnv }  = require('./secrets');
 
-const {validateAccessToken} = require('./middleware/auth0.middleware');
+const setupAuthMiddleware = require('./middleware/auth0.middleware');
 const { errorHandler } = require("./middleware/error.middleware");
 const notFoundHandler = require("./middleware/not-found.middleware");
 
@@ -28,7 +28,7 @@ app.use(express.json());
 // console.log('\x1b[31m%s\x1b[0m', process.env.TEST_THAT_LOAD_WORKS);
 // console.log('\x1b[31m%s\x1b[0m', process.env.FIRST_TIME);
 
-loadSecretsIntoEnv().then(() => {
+loadSecretsIntoEnv().then(async () => {
 
     // SCOPES
     const VIEW_HISTORY_SCOPE = 'read:history';
@@ -92,6 +92,7 @@ loadSecretsIntoEnv().then(() => {
     });
 
     // SECURE ALL ROUTES (except health check \ which we use for load balancer)
+    const validateAccessToken = await setupAuthMiddleware();
     app.use(validateAccessToken);
     // console.log('\x1b[31m%s\x1b[0m', process.env.TEST_THAT_LOAD_WORKS);
     //--------------------------------------------
