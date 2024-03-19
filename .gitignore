@@ -31,3 +31,6 @@ build-output/
 
 # Temporary ignore
 messages/
+
+# log files
+*.log
