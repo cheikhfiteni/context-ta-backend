@@ -10,7 +10,7 @@ async function setupAuthMiddleware() {
 
   console.log('\x1b[31m%s\x1b[0m', process.env.AUTH0_DOMAIN);
   console.log('\x1b[31m%s\x1b[0m', process.env.AUTH0_AUDIENCE);
-  writeErrorLog(`Error retrieving secrets: ${process.env.AUTH0_DOMAIN} \n \n  ${process.env.AUTH0_AUDIENCE}`, false);
+  writeErrorLog(`${process.env.AUTH0_DOMAIN} \n \n  ${process.env.AUTH0_AUDIENCE}`, false);
 
   const validateAccessToken = auth({
     issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
