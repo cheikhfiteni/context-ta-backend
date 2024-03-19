@@ -2,19 +2,20 @@ const { auth } = require("express-oauth2-jwt-bearer");
 const { loadSecretsIntoEnv } = require('../secrets'); // Adjust the path as necessary
 const { writeErrorLog } = require('../logger');
 
+// fixed in aws secrets manager, but use as an invariant
+function removeQuotes(string) {
+  return string.replace(/^"(.+(?="$))"$/, '$1');
+}
+
 async function setupAuthMiddleware() {
   await loadSecretsIntoEnv(); // Ensure secrets are loaded before proceeding
 
-  // Print in red the environment variables to ensure they are loaded
-  // DELETE AFTER TESTING!!!
-
-  console.log('\x1b[31m%s\x1b[0m', process.env.AUTH0_DOMAIN);
-  console.log('\x1b[31m%s\x1b[0m', process.env.AUTH0_AUDIENCE);
-  writeErrorLog(`${process.env.AUTH0_DOMAIN} \n \n  ${process.env.AUTH0_AUDIENCE}`, false);
+  const auth0Domain = removeQuotes(process.env.AUTH0_DOMAIN);
+  const auth0Audience = removeQuotes(process.env.AUTH0_AUDIENCE);
 
   const validateAccessToken = auth({
-    issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
-    audience: process.env.AUTH0_AUDIENCE,
+    issuerBaseURL: `https://${auth0Domain}`,
+    audience: auth0Audience,
   });
 
   return validateAccessToken;

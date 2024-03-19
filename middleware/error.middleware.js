@@ -19,7 +19,8 @@ const errorHandler = (error, request, response, next) => {
       "Stack Trace: " + error.stack,
       "Request Headers: " + JSON.stringify(request.headers, null, 2)
     ].join('\n\n');
-    writeErrorLog(logMessage, true);
+    // use for debugging
+    // writeErrorLog(logMessage, true);
     
     response.status(error.status).json({ message });
 
