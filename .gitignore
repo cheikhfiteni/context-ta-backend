@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# .env files
+*.env
+
 # AWS CodeBuild Output
 build-output/
 
@@ -25,3 +28,6 @@ build-output/
 *.njsproj
 *.sln
 *.sw?
+
+# Temporary ignore
+messages/
