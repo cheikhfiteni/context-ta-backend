@@ -41,6 +41,7 @@ loadSecretsIntoEnv().then(async () => {
         'https://context-asa06jm4w-envoy-intelligence.vercel.app',
         'https://context-fiq8a0eob-envoy-intelligence.vercel.app', // Removed the trailing slash here
         'https://context-ta.com',
+        'https://www.context-ta.com/',
         'https://context-ta.vercel.app',
         ],
         optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
