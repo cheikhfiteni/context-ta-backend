@@ -1,5 +1,12 @@
 const OpenAI = require("openai");
-const openai = new OpenAI({ apiKey: `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`,  dangerouslyAllowBrowser: true });
+require('dotenv').config();
+
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+  throw new Error('OPENAI_API_KEY is not defined in environment variables');
+}
+
+const openai = new OpenAI({ apiKey: apiKey, dangerouslyAllowBrowser: true });
 
 const callOpenAI = async (prompt) => {
   const completion = await openai.chat.completions.create({
